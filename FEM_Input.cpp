@@ -5,7 +5,7 @@
 void generateSolverInput(string filename)
 {
 	ifstream infile(filename);
-	ofstream outfile("D:\\Dokumente\\C++\\FEM_2D_Plane_Stress\\Debug\\Solver_Input.txt");
+	ofstream outfile("Solver_Input.txt");
 	
 	//Read general information
 	int problemDimension, nodesCount, elementCount, materialCount, BoundaryEdgesCount, BoundaryBlocksCount;
