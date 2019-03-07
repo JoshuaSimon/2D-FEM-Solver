@@ -8,7 +8,7 @@ http://eigen.tuxfamily.org/index.php?title=Main_Page
 All plots were created with "gnuplot". For more information see:
 http://www.gnuplot.info/
 
-Geometry and input mesh data were created with the "GiD" Software. For more information see:
+Geometry and input mesh data were created with the "GiD" software. For more information see:
 https://www.gidhome.com/
 
 
