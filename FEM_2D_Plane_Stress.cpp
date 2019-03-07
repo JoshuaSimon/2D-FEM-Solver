@@ -122,13 +122,13 @@ int main(void)
 	//1. Pre Processing
 	//Read GiD Mesh Data and write solver input.
 	cout << "Pre Processor: Define boundary conditions and loads." << std::endl << std::endl;
-	generateSolverInput("D:\\Dokumente\\C++\\FEM_2D_Plane_Stress\\Debug\\Mesh_Contact.txt");
+	generateSolverInput("Mesh.txt");
 	cout << "Pre Processor: Solver input generated!" << endl << endl;
 
-	std::ifstream infile("D:\\Dokumente\\C++\\FEM_2D_Plane_Stress\\Debug\\Solver_Input.txt");
-	std::ofstream outfile("D:\\Dokumente\\C++\\FEM_2D_Plane_Stress\\Debug\\Outputfile_2.txt");
-	std::ofstream outfile_gnuplot("D:\\Dokumente\\C++\\FEM_2D_Plane_Stress\\Debug\\GNUPlot_Input.txt");
-	std::ofstream outfile_gnuplot_contur("D:\\Dokumente\\C++\\FEM_2D_Plane_Stress\\Debug\\GNUPlot_Input_contur.txt");
+	std::ifstream infile("Solver_Input.txt");
+	std::ofstream outfile("Outputfile_2.txt");
+	std::ofstream outfile_gnuplot("GNUPlot_Input.txt");
+	std::ofstream outfile_gnuplot_contur("GNUPlot_Input_contur.txt");
 
 	//2. Solution
 	std::cout << "Solver: Creating mathematical model..." << std::endl;
