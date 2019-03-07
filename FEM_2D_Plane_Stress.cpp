@@ -238,7 +238,6 @@ int main(void)
 			displacements.segment<2>(2 * it->nodesIds[2]);
 
 		Eigen::Vector3f sigma = D * it->B * delta;
-		//float sigma_mises = sqrt(sigma[0] * sigma[0] - sigma[0] * sigma[1] + sigma[1] * sigma[1] + 3.0f * sigma[2] * sigma[2]);
 		sigma_mises[m] = sqrt(sigma[0] * sigma[0] - sigma[0] * sigma[1] + sigma[1] * sigma[1] + 3.0f * sigma[2] * sigma[2]);
 
 		//Search for maximum stress
@@ -271,7 +270,7 @@ int main(void)
 
 
 
-	//3.2 Wirting GNUPlot output file for stress conturplot
+	//3.2 Wirting GNUPlot input file for stress conturplot
 	outfile_gnuplot_contur << "unset xtics" << std::endl;
 	outfile_gnuplot_contur << "unset ytics" << std::endl;
 	outfile_gnuplot_contur << "set cbrange [0:1]" << std::endl << std::endl;
