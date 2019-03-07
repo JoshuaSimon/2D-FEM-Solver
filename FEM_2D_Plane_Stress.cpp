@@ -116,17 +116,17 @@ int main(void)
 {
 	cout << "---------------------- 2D FEM SOLVER ---------------------" << std::endl;
 	cout << "FEM software for solving elastic 2D plain stress problems." << std::endl;
-	cout << "Created by Joshua Simon, Date: 25.05.2019." << std::endl;
+	cout << "Created by Joshua Simon, Date: 25.02.2019." << std::endl;
 	cout << std::endl;
 
 	//1. Pre Processing
 	//Read GiD Mesh Data and write solver input.
 	cout << "Pre Processor: Define boundary conditions and loads." << std::endl << std::endl;
-	generateSolverInput("Mesh.txt");
+	generateSolverInput("Mesh_Input_Ex_01.txt");
 	cout << "Pre Processor: Solver input generated!" << endl << endl;
 
 	std::ifstream infile("Solver_Input.txt");
-	std::ofstream outfile("Outputfile_2.txt");
+	std::ofstream outfile("Outputfile.txt");
 	std::ofstream outfile_gnuplot("GNUPlot_Input.txt");
 	std::ofstream outfile_gnuplot_contur("GNUPlot_Input_contur.txt");
 
