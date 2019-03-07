@@ -30,10 +30,10 @@ struct Constraint
 	Type type;
 };
 
-int							nodesCount;
-Eigen::VectorXf				nodesX;
-Eigen::VectorXf				nodesY;
-Eigen::VectorXf				loads;
+int				nodesCount;
+Eigen::VectorXf			nodesX;
+Eigen::VectorXf			nodesY;
+Eigen::VectorXf			loads;
 std::vector< Element >		elements;
 std::vector< Constraint >	constraints;
 
