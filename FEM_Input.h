@@ -7,4 +7,5 @@
 #include <vector>
 using namespace std;
 
-void generateSolverInput(string filename);
+// Function for reading mesh data(GiD export file) and creating solver input
+void generateSolverInput(string mesh_data_file_name, string solver_input_file_name);
