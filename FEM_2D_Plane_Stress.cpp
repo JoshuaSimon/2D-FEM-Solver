@@ -245,7 +245,7 @@ int main(void)
 	Eigen::VectorXf displacements = solver.solve(loads);
 	std::cout << "Solver: Solving done!" << std::endl << std::endl;
 
-	//Writing output and display on consol
+	//Writing output and display on console
 	//std::cout << "Loads vector:" << std::endl << loads << std::endl << std::endl;			//Loads
 	//std::cout << "Displacements vector:" << std::endl << displacements << std::endl;		//Displaysments
 
@@ -279,7 +279,7 @@ int main(void)
 	}
 
 	//4. Post Processing:
-	//4.1 Wirting GNUPlot output file for ploting mesh and mesh + displacements
+	//4.1 Writing GNUPlot output file for ploting mesh and mesh + displacements
 	for (std::vector<Element>::iterator it = elements.begin(); it != elements.end(); ++it)
 	{
 		//Prints x,y,dis-x,dis-y for every node of element in one line
@@ -295,13 +295,13 @@ int main(void)
 		outfile_gnuplot << std::endl;
 	}
 
-	//4.2 Wirting GNUPlot output file for stress contour plot
+	//4.2 Writing GNUPlot output file for stress contour plot
 	outfile_gnuplot_contur << "unset xtics" << std::endl;
 	outfile_gnuplot_contur << "unset ytics" << std::endl;
 	outfile_gnuplot_contur << "set cbrange [0:1]" << std::endl << std::endl;
 	outfile_gnuplot_contur << "plot[-15:15][-15:15] \\" << std::endl;
 
-	//Wirte color information for every element
+	//Write color information for every element
 	int mm = 0;
 	for (std::vector<Element>::iterator it = elements.begin(); it != (elements.end()-1); ++it) {
 		outfile_gnuplot_contur << "\"-\" title \"\" with filledcurve lt palette cb " \
@@ -310,7 +310,7 @@ int main(void)
 		mm++;
 	}
 
-	//Wirte color information for last element
+	//Write color information for last element
 	outfile_gnuplot_contur << "\"-\" title \"\" with filledcurve lt palette cb " \
 						   << sigma_mises[elementCount-1] / sigma_max << " \\" << std::endl;
 	outfile_gnuplot_contur << "fillstyle transparent solid 1.000000 ;" << std::endl;
@@ -318,7 +318,7 @@ int main(void)
 
 	for (std::vector<Element>::iterator it = elements.begin(); it != elements.end(); ++it)
 	{
-		//Elements and thier nodes:
+		//Elements and their nodes:
 		//Prints x,y for every node of element in one line
 		for (int i = 0; i < 3; i++) {
 			outfile_gnuplot_contur << nodesX(it->nodesIds[i]) << " " << nodesY(it->nodesIds[i]) << std::endl;
