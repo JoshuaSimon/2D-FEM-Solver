@@ -2,10 +2,11 @@
 #include "pch.h"
 #include "FEM_Input.h"
 
-void generateSolverInput(string filename)
+// Read mesh data (GiD export file) and create solver input
+void generateSolverInput(string mesh_data_file_name, string solver_input_file_name)
 {
-	ifstream infile(filename);
-	ofstream outfile("Solver_Input.txt");
+	ifstream infile(mesh_data_file_name);
+	ofstream outfile(solver_input_file_name);
 	
 	//Read general information
 	int problemDimension, nodesCount, elementCount, materialCount, BoundaryEdgesCount, BoundaryBlocksCount;
@@ -32,7 +33,7 @@ void generateSolverInput(string filename)
 	infile >> type >> elementNumber;
 	outfile << elementNumber << endl;
 
-	//Read, format and wirte nodes to coresbonding elements
+	//Read, format and wirte nodes to corresponding elements
 	int elementMaterial, node_1, node_2, node_3;
 
 	for (int i = 0; i < elementNumber; i++) {
@@ -43,7 +44,7 @@ void generateSolverInput(string filename)
 		outfile << node_1 << " " << node_2 << " " << node_3 << endl;
 	}
 
-	//Read Boundary Conditions
+	//Read boundary conditions
 	int boundType, boundEdgeNumbers, lineSpecifier;
 	int fixedNodesCount = 0;
 	int forceNodesCount = 0;
@@ -63,7 +64,7 @@ void generateSolverInput(string filename)
 		cout << ">> "; cin >> lineSpecifier;
 		cout << endl;
 		
-		//Input nodal force for x and y componets
+		//Input nodal force for x and y components
 		if (lineSpecifier == 2) {
 			cout << "Nodal force fx = ";
 			cin >> fx;
