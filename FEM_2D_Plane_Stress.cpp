@@ -10,6 +10,7 @@
 #include <iostream>
 #include <fstream>
 
+//Element data type
 struct Element
 {
 	void CalculateStiffnessMatrix(const Eigen::Matrix3f& D, std::vector<Eigen::Triplet<float> >& triplets);
@@ -18,6 +19,7 @@ struct Element
 	int nodesIds[3];
 };
 
+//Boundary constraint data type
 struct Constraint
 {
 	enum Type
@@ -30,6 +32,7 @@ struct Constraint
 	Type type;
 };
 
+//Globals
 int				nodesCount;
 Eigen::VectorXf			nodesX;
 Eigen::VectorXf			nodesY;
@@ -37,6 +40,7 @@ Eigen::VectorXf			loads;
 std::vector< Element >		elements;
 std::vector< Constraint >	constraints;
 
+//Function for calculating the element stiffness matrix.
 void Element::CalculateStiffnessMatrix(const Eigen::Matrix3f& D, std::vector<Eigen::Triplet<float> >& triplets)
 {
 	Eigen::Vector3f x, y;
@@ -46,8 +50,11 @@ void Element::CalculateStiffnessMatrix(const Eigen::Matrix3f& D, std::vector<Eig
 	Eigen::Matrix3f C;
 	C << Eigen::Vector3f(1.0f, 1.0f, 1.0f), x, y;
 
+	//Calculating coefficients for shape functions (a1, a2, a3). 
+	//These are relevant for interpolation.
 	Eigen::Matrix3f IC = C.inverse();
 
+	//Assemble B matrix
 	for (int i = 0; i < 3; i++)
 	{
 		B(0, 2 * i + 0) = IC(1, i);
@@ -57,8 +64,11 @@ void Element::CalculateStiffnessMatrix(const Eigen::Matrix3f& D, std::vector<Eig
 		B(2, 2 * i + 0) = IC(2, i);
 		B(2, 2 * i + 1) = IC(1, i);
 	}
+
+	//Calculate element stiffness (det(C)/2 = area of triangle).
 	Eigen::Matrix<float, 6, 6> K = B.transpose() * D * B * C.determinant() / 2.0f;
 
+	//Store values of element stiffness matrix with corresponding indices in global stiffness matrix in triplets.
 	for (int i = 0; i < 3; i++)
 	{
 		for (int j = 0; j < 3; j++)
@@ -76,6 +86,7 @@ void Element::CalculateStiffnessMatrix(const Eigen::Matrix3f& D, std::vector<Eig
 	}
 }
 
+//Function for setting constraints. 
 void SetConstraints(Eigen::SparseMatrix<float>::InnerIterator& it, int index)
 {
 	if (it.row() == index || it.col() == index)
@@ -84,6 +95,7 @@ void SetConstraints(Eigen::SparseMatrix<float>::InnerIterator& it, int index)
 	}
 }
 
+//Function for applying constraints in stiffness matrix.
 void ApplyConstraints(Eigen::SparseMatrix<float>& K, const std::vector<Constraint>& constraints)
 {
 	std::vector<int> indicesToConstraint;
@@ -114,30 +126,45 @@ void ApplyConstraints(Eigen::SparseMatrix<float>& K, const std::vector<Constrain
 
 int main(void)
 {
-	cout << "---------------------- 2D FEM SOLVER ---------------------" << std::endl;
-	cout << "FEM software for solving elastic 2D plain stress problems." << std::endl;
-	cout << "Created by Joshua Simon, Date: 25.02.2019." << std::endl;
-	cout << std::endl;
+	std::cout << "---------------------- 2D FEM SOLVER ---------------------" << std::endl;
+	std::cout << "FEM software for solving elastic 2D plain stress problems." << std::endl;
+	std::cout << "Created by Joshua Simon. Date: 25.02.2019." << std::endl;
+	std::cout << std::endl;
 
-	//1. Pre Processing
-	//Read GiD Mesh Data and write solver input.
-	cout << "Pre Processor: Define boundary conditions and loads." << std::endl << std::endl;
-	generateSolverInput("Mesh_Input_Ex_01.txt");
-	cout << "Pre Processor: Solver input generated!" << endl << endl;
 
-	std::ifstream infile("Solver_Input.txt");
-	std::ofstream outfile("Outputfile.txt");
-	std::ofstream outfile_gnuplot("GNUPlot_Input.txt");
-	std::ofstream outfile_gnuplot_contur("GNUPlot_Input_contur.txt");
+	//1. Paths and filenames
+	string mesh_data_file;								//This filename is read from user input.
+	string solver_input_file = "Solver_Input.txt";
+	string displacement_plot_data = "GNUPlot_Input_displacement.txt";
+	string stress_plot_data = "GNUPlot_Input_contour.txt";
+	
+	//User input of mesh data file
+	std::cout << "Enter the filename of the GiD mesh data file. If the data file is " << std::endl;
+	std::cout << "not in same folder as this application, than enter the whole path " << std::endl;
+	std::cout << "of the mesh data file with filename. Use \\\\ for \\ in address. " << std::endl;
+	std::cout << std::endl << "Filename >> ";
+	std::cin >> mesh_data_file;
+	std::cout << std::endl << std::endl;
 
-	//2. Solution
+	//2. Pre Processing:
+	//Read GiD mesh Data and write solver input.
+	std::cout << "Pre Processor: Define boundary conditions and loads." << std::endl << std::endl;
+	generateSolverInput(mesh_data_file, solver_input_file);
+	std::cout << "Pre Processor: Solver input generated!" << std::endl << std::endl;
+
+	std::ifstream infile(solver_input_file);
+	std::ofstream outfile("Solution_Data.txt");					//This file contains solution data.
+	std::ofstream outfile_gnuplot(displacement_plot_data);				//This file contains plot data.
+	std::ofstream outfile_gnuplot_contur(stress_plot_data);				//This file contains plot data.
+
+	//3. Solution:
 	std::cout << "Solver: Creating mathematical model..." << std::endl;
 
 	//Read material specifications
 	float poissonRatio, youngModulus;
 	infile >> poissonRatio >> youngModulus;
 
-
+	//Assemble elasticity matrix D
 	Eigen::Matrix3f D;
 	D <<
 		1.0f, poissonRatio, 0.0f,
@@ -183,7 +210,6 @@ int main(void)
 	loads.resize(2 * nodesCount);
 	loads.setZero();
 
-
 	//Read number of nodal loads and nodal forces
 	int loadsCount;
 	infile >> loadsCount;
@@ -197,13 +223,14 @@ int main(void)
 		loads[2 * node + 1] = y;
 	}
 
-	//Calculate stiffness matrix
+	//Calculate stiffness matrix for each element
 	std::vector<Eigen::Triplet<float> > triplets;
 	for (std::vector<Element>::iterator it = elements.begin(); it != elements.end(); ++it)
 	{
 		it->CalculateStiffnessMatrix(D, triplets);
 	}
 
+	//Assemble global stiffness matirx
 	Eigen::SparseMatrix<float> globalK(2 * nodesCount, 2 * nodesCount);
 	globalK.setFromTriplets(triplets.begin(), triplets.end());
 
@@ -224,7 +251,7 @@ int main(void)
 
 	outfile << displacements << std::endl;
 
-	//std::cout << "Stresses:" << std::endl;													//Von Mises Stress
+	//std::cout << "Stresses:" << std::endl;							//Von Mises Stress
 
 	int m = 0;
 	float sigma_max = 0.0;
@@ -245,14 +272,14 @@ int main(void)
 			sigma_max = sigma_mises[m];
 		}
 
-		//std::cout << sigma_mises << std::endl;
+		//std::cout << sigma_mises[m] << std::endl;						//Von Mises Stress
 		outfile << sigma_mises[m] << std::endl;
 
 		m++;
 	}
 
-	//3. Post Processing
-	//3.1 Wirting GNUPlot output file for ploting mesh and mesh + displacements
+	//4. Post Processing:
+	//4.1 Wirting GNUPlot output file for ploting mesh and mesh + displacements
 	for (std::vector<Element>::iterator it = elements.begin(); it != elements.end(); ++it)
 	{
 		//Prints x,y,dis-x,dis-y for every node of element in one line
@@ -268,9 +295,7 @@ int main(void)
 		outfile_gnuplot << std::endl;
 	}
 
-
-
-	//3.2 Wirting GNUPlot input file for stress conturplot
+	//4.2 Wirting GNUPlot output file for stress contour plot
 	outfile_gnuplot_contur << "unset xtics" << std::endl;
 	outfile_gnuplot_contur << "unset ytics" << std::endl;
 	outfile_gnuplot_contur << "set cbrange [0:1]" << std::endl << std::endl;
@@ -307,8 +332,8 @@ int main(void)
 
 	std::cout << "Post Processor: Plotting solution..." << std::endl << std::endl;
 
-	//3.3 Plot results
-	plot("D:\\Dokumente\\C++\\FEM_2D_Plane_Stress\\Debug\\GNUPlot_Input.txt");
+	//4.3 Plot results
+	plot(displacement_plot_data);
 
 	delete[] sigma_mises;
 
