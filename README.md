@@ -16,5 +16,10 @@ Geometry and input mesh data were created with the "GiD" software. For more info
 https://www.gidhome.com/
 
 ## Examples
+Ex. 1:
+V. Mises stress and displacement plots for a metal bar. Boundary conditions in this example:
+- Fixed support on the left edge
+- Applied force in negative y-direction on the top edge
 
 ![Stress_Plot_Ex_01.png](https://github.com/JoshuaSimon/2D-FEM-Solver/blob/master/Example/Stress_Plot_Ex_01.png)
+![Displacements_Plot_Ex_01.png](https://github.com/JoshuaSimon/2D-FEM-Solver/blob/master/Example/Displacements_Plot_Ex_01.png)
