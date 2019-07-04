@@ -15,3 +15,6 @@ http://www.gnuplot.info/
 Geometry and input mesh data were created with the "GiD" software. For more information see:
 https://www.gidhome.com/
 
+## Examples
+
+![Stress_Plot_Ex_01.png]https://github.com/JoshuaSimon/2D-FEM-Solver/blob/master/Example/Stress_Plot_Ex_01.png
