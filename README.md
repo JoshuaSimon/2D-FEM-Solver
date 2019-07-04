@@ -23,3 +23,11 @@ V. Mises stress and displacement plots for a metal bar. Boundary conditions in t
 
 ![Stress_Plot_Ex_01.png](https://github.com/JoshuaSimon/2D-FEM-Solver/blob/master/Example/Stress_Plot_Ex_01.png)
 ![Displacements_Plot_Ex_01.png](https://github.com/JoshuaSimon/2D-FEM-Solver/blob/master/Example/Displacements_Plot_Ex_01.png)
+
+### Ex. 2:
+V. Mises stress and displacement plots for a metal plate with a circular bore. Boundary conditions in this example:
+- Fixed support around the circular bore
+- Applied force in negative y-direction on the top edge
+
+![Stress_Plot_Ex_02.png](https://github.com/JoshuaSimon/2D-FEM-Solver/blob/master/Example%202/Stress_Plot_Ex_02.png)
+![Displacements_Plot_Ex_02.png](https://github.com/JoshuaSimon/2D-FEM-Solver/blob/master/Example%202/Displacements_Plot_Ex_02.png)
