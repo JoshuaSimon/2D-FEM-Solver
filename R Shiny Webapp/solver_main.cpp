@@ -120,6 +120,7 @@ void ApplyConstraints(Eigen::SparseMatrix<float>& K, const std::vector<Constrain
 	}
 }
 
+// Functions
 void generateSolverInput(std::string mesh_data_file_name, std::string solver_input_file_name);
 
 // [[Rcpp::export]]
@@ -131,7 +132,7 @@ std::vector<std::vector<float>> solver(std::string mesh_data_file) {
     Rcpp::Rcout << "---------------------- 2D FEM SOLVER ---------------------" << std::endl;
 	Rcpp::Rcout << "FEM software for solving elastic 2D plain stress problems." << std::endl;
 	Rcpp::Rcout << "Created by Joshua Simon. Date: 25.02.2019." << std::endl;
-	Rcpp::Rcout << std::endl;
+	Rcpp::Rcout << std::endl << std::endl;
 
 
 	//1. Paths and filenames
@@ -139,12 +140,6 @@ std::vector<std::vector<float>> solver(std::string mesh_data_file) {
 	std::string solver_input_file = "Solver_Input.txt";
 	std::string displacement_plot_data = "GNUPlot_Input_displacement.txt";
 	std::string stress_plot_data = "GNUPlot_Input_contour.txt";
-	
-	//User input of mesh data file
-	Rcpp::Rcout << "Enter the filename of the GiD mesh data file. If the data file is " << std::endl;
-	Rcpp::Rcout << "not in same folder as this application, than enter the whole path " << std::endl;
-	Rcpp::Rcout << "of the mesh data file with filename. Use \\\\ for \\ in address. " << std::endl;
-	Rcpp::Rcout << std::endl << std::endl;
 
 	//2. Pre Processing:
 	//Read GiD mesh Data and write solver input.
@@ -276,7 +271,8 @@ std::vector<std::vector<float>> solver(std::string mesh_data_file) {
 	}
 
 	//4. Post Processing:
-    std::vector<std::vector<float>> output_displacement(elementCount*4, std::vector<float> (4));
+    //std::vector<std::vector<float>> output_displacement(elementCount*4, std::vector<float> (4));
+	std::vector<std::vector<float>> output_displacement(elementCount*3, std::vector<float> (4));
     int output_index = 0;
     //4.1 Writing GNUPlot output file for ploting mesh and mesh + displacements
 	for (std::vector<Element>::iterator it = elements.begin(); it != elements.end(); ++it)
@@ -293,12 +289,12 @@ std::vector<std::vector<float>> solver(std::string mesh_data_file) {
 
 		// First node of element has to appear twice for plotting purpose
         // to close the triangle. 
-		output_displacement[output_index][0] = nodesX(it->nodesIds[0]);
+		/*output_displacement[output_index][0] = nodesX(it->nodesIds[0]);
         output_displacement[output_index][1] = nodesY(it->nodesIds[0]);
 	    output_displacement[output_index][2] = displacements(it->nodesIds[0] * 2);
         output_displacement[output_index][3] = displacements(it->nodesIds[0] * 2 + 1);
-
-        output_index++;
+		
+        output_index++;*/
 	}
 
     Rcpp::Rcout << std::endl;
