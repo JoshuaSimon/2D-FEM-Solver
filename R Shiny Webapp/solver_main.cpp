@@ -35,6 +35,7 @@ Eigen::VectorXf			    nodesY;
 Eigen::VectorXf			    loads;
 std::vector< Element >		elements;
 std::vector< Constraint >	constraints;
+std::vector<float> 			output_sigma_mises;
 
 //Function for calculating the element stiffness matrix.
 void Element::CalculateStiffnessMatrix(const Eigen::Matrix3f& D, std::vector<Eigen::Triplet<float> >& triplets)
@@ -124,10 +125,13 @@ void ApplyConstraints(Eigen::SparseMatrix<float>& K, const std::vector<Constrain
 void generateSolverInput(std::string mesh_data_file_name, std::string solver_input_file_name);
 
 // [[Rcpp::export]]
+std::vector<float> output_mises_stress() {
+	return output_sigma_mises;
+}
+
+// [[Rcpp::export]]
 //std::vector<float> solver(std::string mesh_data_file) {
 std::vector<std::vector<float>> solver(std::string mesh_data_file) {
-
-    
 
     Rcpp::Rcout << "---------------------- 2D FEM SOLVER ---------------------" << std::endl;
 	Rcpp::Rcout << "FEM software for solving elastic 2D plain stress problems." << std::endl;
@@ -136,7 +140,6 @@ std::vector<std::vector<float>> solver(std::string mesh_data_file) {
 
 
 	//1. Paths and filenames
-							
 	std::string solver_input_file = "Solver_Input.txt";
 	std::string displacement_plot_data = "GNUPlot_Input_displacement.txt";
 	std::string stress_plot_data = "GNUPlot_Input_contour.txt";
@@ -147,10 +150,8 @@ std::vector<std::vector<float>> solver(std::string mesh_data_file) {
 	generateSolverInput(mesh_data_file, solver_input_file);
 	Rcpp::Rcout << "Pre Processor: Solver input generated!" << std::endl << std::endl;
 
-	std::ifstream infile(solver_input_file);                    // This filename is read from user input.
-	//std::ofstream outfile("Solution_Data.txt");					// This file contains solution data.
-	//std::ofstream outfile_gnuplot(displacement_plot_data);		// This file contains plot data.
-	//std::ofstream outfile_gnuplot_contur(stress_plot_data);		// This file contains plot data.
+	// This filename is read from user input.
+	std::ifstream infile(solver_input_file);                    
 
 	//3. Solution:
 	Rcpp::Rcout << "Solver: Creating mathematical model..." << std::endl;
@@ -240,17 +241,10 @@ std::vector<std::vector<float>> solver(std::string mesh_data_file) {
 	Eigen::VectorXf displacements = solver.solve(loads);
 	Rcpp::Rcout << "Solver: Solving done!" << std::endl << std::endl;
 
-	//Writing output and display on console
-	//std::cout << "Loads vector:" << std::endl << loads << std::endl << std::endl;			//Loads
-	//std::cout << "Displacements vector:" << std::endl << displacements << std::endl;		//Displaysments
-
-
-	//std::cout << "Stresses:" << std::endl;							//Von Mises Stress
 
 	int m = 0;
 	float sigma_max = 0.0;
-	//float *sigma_mises = new float[elementCount];
-    std::vector<float> output_sigma_mises (elementCount); 
+    //std::vector<float> output_sigma_mises (elementCount); 
 
 	for (std::vector<Element>::iterator it = elements.begin(); it != elements.end(); ++it)
 	{
@@ -260,7 +254,8 @@ std::vector<std::vector<float>> solver(std::string mesh_data_file) {
 			displacements.segment<2>(2 * it->nodesIds[2]);
 
 		Eigen::Vector3f sigma = D * it->B * delta;
-		output_sigma_mises[m] = sqrt(sigma[0] * sigma[0] - sigma[0] * sigma[1] + sigma[1] * sigma[1] + 3.0f * sigma[2] * sigma[2]);
+		//output_sigma_mises[m] = sqrt(sigma[0] * sigma[0] - sigma[0] * sigma[1] + sigma[1] * sigma[1] + 3.0f * sigma[2] * sigma[2]);
+		output_sigma_mises.push_back(sqrt(sigma[0] * sigma[0] - sigma[0] * sigma[1] + sigma[1] * sigma[1] + 3.0f * sigma[2] * sigma[2]));
 
 		//Search for maximum stress
 		if (output_sigma_mises[m] > sigma_max) {
