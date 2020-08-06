@@ -6,7 +6,7 @@
 #include <D:\Dokumente\C++\Includes\eigen\Eigen/Dense>
 #include <D:\Dokumente\C++\Includes\eigen\Eigen/Sparse>
 
-//Element data type
+// Element data type.
 struct Element
 {
 	void CalculateStiffnessMatrix(const Eigen::Matrix3f& D, std::vector<Eigen::Triplet<float> >& triplets);
@@ -15,7 +15,7 @@ struct Element
 	int nodesIds[3];
 };
 
-//Boundary constraint data type
+// Boundary constraint data type.
 struct Constraint
 {
 	enum Type
@@ -28,7 +28,7 @@ struct Constraint
 	Type type;
 };
 
-//Globals
+// Globals.
 int				            nodesCount;
 Eigen::VectorXf			    nodesX;
 Eigen::VectorXf			    nodesY;
@@ -37,7 +37,7 @@ std::vector< Element >		elements;
 std::vector< Constraint >	constraints;
 std::vector<float> 			output_sigma_mises;
 
-//Function for calculating the element stiffness matrix.
+// Function for calculating the element stiffness matrix.
 void Element::CalculateStiffnessMatrix(const Eigen::Matrix3f& D, std::vector<Eigen::Triplet<float> >& triplets)
 {
 	Eigen::Vector3f x, y;
@@ -47,11 +47,11 @@ void Element::CalculateStiffnessMatrix(const Eigen::Matrix3f& D, std::vector<Eig
 	Eigen::Matrix3f C;
 	C << Eigen::Vector3f(1.0f, 1.0f, 1.0f), x, y;
 
-	//Calculating coefficients for shape functions (a1, a2, a3). 
-	//These are relevant for interpolation.
+	// Calculating coefficients for shape functions (a1, a2, a3). 
+	// These are relevant for interpolation.
 	Eigen::Matrix3f IC = C.inverse();
 
-	//Assemble B matrix
+	// Assemble B matrix.
 	for (int i = 0; i < 3; i++)
 	{
 		B(0, 2 * i + 0) = IC(1, i);
@@ -62,10 +62,10 @@ void Element::CalculateStiffnessMatrix(const Eigen::Matrix3f& D, std::vector<Eig
 		B(2, 2 * i + 1) = IC(1, i);
 	}
 
-	//Calculate element stiffness (det(C)/2 = area of triangle).
+	// Calculate element stiffness (det(C)/2 = area of triangle).
 	Eigen::Matrix<float, 6, 6> K = B.transpose() * D * B * C.determinant() / 2.0f;
 
-	//Store values of element stiffness matrix with corresponding indices in global stiffness matrix in triplets.
+	// Store values of element stiffness matrix with corresponding indices in global stiffness matrix in triplets.
 	for (int i = 0; i < 3; i++)
 	{
 		for (int j = 0; j < 3; j++)
@@ -83,7 +83,7 @@ void Element::CalculateStiffnessMatrix(const Eigen::Matrix3f& D, std::vector<Eig
 	}
 }
 
-//Function for setting constraints. 
+// Function for setting constraints. 
 void SetConstraints(Eigen::SparseMatrix<float>::InnerIterator& it, int index)
 {
 	if (it.row() == index || it.col() == index)
@@ -92,7 +92,7 @@ void SetConstraints(Eigen::SparseMatrix<float>::InnerIterator& it, int index)
 	}
 }
 
-//Function for applying constraints in stiffness matrix.
+// Function for applying constraints in stiffness matrix.
 void ApplyConstraints(Eigen::SparseMatrix<float>& K, const std::vector<Constraint>& constraints)
 {
 	std::vector<int> indicesToConstraint;
@@ -121,7 +121,7 @@ void ApplyConstraints(Eigen::SparseMatrix<float>& K, const std::vector<Constrain
 	}
 }
 
-// Functions
+// Functions:
 void generateSolverInput(std::string mesh_data_file_name, std::string solver_input_file_name);
 
 // [[Rcpp::export]]
@@ -129,9 +129,9 @@ std::vector<float> output_mises_stress() {
 	return output_sigma_mises;
 }
 
-// [[Rcpp::export]]
 //std::vector<float> solver(std::string mesh_data_file) {
-std::vector<std::vector<float>> solver(std::string mesh_data_file) {
+// [[Rcpp::export]]
+std::vector<std::vector<float>> solve_linear_elastic(std::string mesh_data_file) {
 
     Rcpp::Rcout << "---------------------- 2D FEM SOLVER ---------------------" << std::endl;
 	Rcpp::Rcout << "FEM software for solving elastic 2D plain stress problems." << std::endl;
@@ -139,13 +139,13 @@ std::vector<std::vector<float>> solver(std::string mesh_data_file) {
 	Rcpp::Rcout << std::endl << std::endl;
 
 
-	//1. Paths and filenames
+	// 1. Paths and filenames.
 	std::string solver_input_file = "Solver_Input.txt";
 	std::string displacement_plot_data = "GNUPlot_Input_displacement.txt";
 	std::string stress_plot_data = "GNUPlot_Input_contour.txt";
 
-	//2. Pre Processing:
-	//Read GiD mesh Data and write solver input.
+	// 2. Pre Processing:
+	// Read GiD mesh Data and write solver input.
 	Rcpp::Rcout << "Pre Processor: Define boundary conditions and loads." << std::endl << std::endl;
 	generateSolverInput(mesh_data_file, solver_input_file);
 	Rcpp::Rcout << "Pre Processor: Solver input generated!" << std::endl << std::endl;
@@ -153,14 +153,14 @@ std::vector<std::vector<float>> solver(std::string mesh_data_file) {
 	// This filename is read from user input.
 	std::ifstream infile(solver_input_file);                    
 
-	//3. Solution:
+	// 3. Solution:
 	Rcpp::Rcout << "Solver: Creating mathematical model..." << std::endl;
 
-	//Read material specifications
+	// Read material specifications.
 	float poissonRatio, youngModulus;
 	infile >> poissonRatio >> youngModulus;
 
-	//Assemble elasticity matrix D
+	// Assemble elasticity matrix D.
 	Eigen::Matrix3f D;
 	D <<
 		1.0f, poissonRatio, 0.0f,
@@ -169,7 +169,7 @@ std::vector<std::vector<float>> solver(std::string mesh_data_file) {
 
 	D *= youngModulus / (1.0f - pow(poissonRatio, 2.0f));
 
-	//Read number of nodes and their coordinates
+	// Read number of nodes and their coordinates.
 	infile >> nodesCount;
 	nodesX.resize(nodesCount);
 	nodesY.resize(nodesCount);
@@ -179,7 +179,7 @@ std::vector<std::vector<float>> solver(std::string mesh_data_file) {
 		infile >> nodesX[i] >> nodesY[i];
 	}
 
-	//Read number of elements and their nodes
+	// Read number of elements and their nodes.
 	int elementCount;
 	infile >> elementCount;
 
@@ -190,7 +190,7 @@ std::vector<std::vector<float>> solver(std::string mesh_data_file) {
 		elements.push_back(element);
 	}
 
-	//Read number of constraints and their node settings
+	// Read number of constraints and their node settings.
 	int constraintCount;
 	infile >> constraintCount;
 
@@ -206,7 +206,7 @@ std::vector<std::vector<float>> solver(std::string mesh_data_file) {
 	loads.resize(2 * nodesCount);
 	loads.setZero();
 
-	//Read number of nodal loads and nodal forces
+	// Read number of nodal loads and nodal forces.
 	int loadsCount;
 	infile >> loadsCount;
 
@@ -219,23 +219,23 @@ std::vector<std::vector<float>> solver(std::string mesh_data_file) {
 		loads[2 * node + 1] = y;
 	}
 
-	//Calculate stiffness matrix for each element
+	// Calculate stiffness matrix for each element.
 	std::vector<Eigen::Triplet<float> > triplets;
 	for (std::vector<Element>::iterator it = elements.begin(); it != elements.end(); ++it)
 	{
 		it->CalculateStiffnessMatrix(D, triplets);
 	}
 
-	//Assemble global stiffness matirx
+	// Assemble global stiffness matirx.
 	Eigen::SparseMatrix<float> globalK(2 * nodesCount, 2 * nodesCount);
 	globalK.setFromTriplets(triplets.begin(), triplets.end());
 
-	//Apply Constraints
+	// Apply Constraints.
 	ApplyConstraints(globalK, constraints);
 
 	Rcpp::Rcout << "Solver: Mathematical model created!" << std::endl;
 
-	//Solving
+	// Solving.
 	Rcpp::Rcout << "Solver: Solving in progress..." << std::endl;
 	Eigen::SimplicialLDLT<Eigen::SparseMatrix<float> > solver(globalK);
 	Eigen::VectorXf displacements = solver.solve(loads);
@@ -309,13 +309,13 @@ void generateSolverInput(std::string mesh_data_file_name, std::string solver_inp
 	infile >> problemDimension;
 	infile >> nodesCount >> elementCount >> materialCount >> BoundaryEdgesCount >> BoundaryBlocksCount;
 
-	//Wirte matiral specifcations (Possion's Ratio and E-Modulus)
+	// Wirte matiral specifcations (Possion's Ratio and E-Modulus).
 	outfile << 0.3 << " " << 2000.0 << std::endl;
 
-	//Write total number of nodes
+	// Write total number of nodes.
 	outfile << nodesCount << std::endl;
 
-	//Read and write x,y coordinates of the nodes
+	// Read and write x,y coordinates of the nodes.
 	int nodeNumber;
 	double x, y;
 
@@ -324,12 +324,12 @@ void generateSolverInput(std::string mesh_data_file_name, std::string solver_inp
 		outfile << x << "  " << y << std::endl;
 	}
 
-	//Read type and number of Elements
+	// Read type and number of Elements.
 	int type, elementNumber;
 	infile >> type >> elementNumber;
 	outfile << elementNumber << std::endl;
 
-	//Read, format and wirte nodes to corresponding elements
+	// Read, format and wirte nodes to corresponding elements.
 	int elementMaterial, node_1, node_2, node_3;
 
 	for (int i = 0; i < elementNumber; i++) {
@@ -340,7 +340,7 @@ void generateSolverInput(std::string mesh_data_file_name, std::string solver_inp
 		outfile << node_1 << " " << node_2 << " " << node_3 << std::endl;
 	}
 
-	//Read boundary conditions
+	// Read boundary conditions.
 	int boundType, boundEdgeNumbers, lineSpecifier;
 	int fixedNodesCount = 0;
 	int forceNodesCount = 0;
@@ -355,13 +355,13 @@ void generateSolverInput(std::string mesh_data_file_name, std::string solver_inp
 
 		infile >> boundType >> boundEdgeNumbers;
 
-		//User input to specify boundarys
+		// User input to specify boundarys.
 		Rcpp::Rcout << "Choose condition for boundary line " << i+1 << " [(1): Fixed Support or (2): Force]:" << std::endl;
 		Rcpp::Rcout << ">> "; 
         std::cin >> lineSpecifier;
 		Rcpp::Rcout << std::endl;
 		
-		//Input nodal force for x and y components
+		// Input nodal force for x and y components.
 		if (lineSpecifier == 2) {
 			Rcpp::Rcout << "Nodal force fx = ";
 			std::cin >> fx;
@@ -388,20 +388,20 @@ void generateSolverInput(std::string mesh_data_file_name, std::string solver_inp
 		}
 	}
 
-	//Write number of fixed nodes to solver input file
+	// Write number of fixed nodes to solver input file.
 	outfile << fixedNodesCount << std::endl;
 	
-	//Write boundary node and condition type to solver input file (1 = UX fixed, 2 = UY fixed, 3 = UX and UY fixed).
+	// Write boundary node and condition type to solver input file (1 = UX fixed, 2 = UY fixed, 3 = UX and UY fixed).
 	for (int i = 0; i < BoundaryEdgesCount; i++) {
 		if (nodeSpecifier[i] == 1) {
 			outfile << start_nodes[i] << " " << 3 << std::endl;
 		}
 	}
 	
-	//Write number of force nodes to solver input file
+	// Write number of force nodes to solver input file.
 	outfile << forceNodesCount << std::endl;
 
-	//Write force node and nodal force componets to solver input file
+	// Write force node and nodal force componets to solver input file.
 	for (int i = 0; i < BoundaryEdgesCount; i++) {
 		if (nodeSpecifier[i] == 2) {
 			outfile << start_nodes[i] << " " << fx << " " << fy << std::endl;
