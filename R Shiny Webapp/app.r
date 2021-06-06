@@ -6,7 +6,7 @@
 
 library(shiny)
 library(shinythemes)
-source("D:\\Dokumente\\GitHub\\2D-FEM-Solver\\R Shiny Webapp\\2D_fem_pre_processor.r", chdir = TRUE)
+source("R Shiny Webapp\\2D_fem_pre_processor.r", chdir = TRUE)
 
 # Compile the C++ source and run the solver.
 init_solver()
@@ -14,7 +14,7 @@ init_solver()
 # Call C++ functions form the compiled source to calculate all 
 # the displacements from the provided input file which contains
 # the mesh data. 
-input_filename <- "D:\\Dokumente\\GitHub\\2D-FEM-Solver\\R Shiny Webapp\\Mesh_Balken_V2.txt"
+input_filename <- "R Shiny Webapp\\Mesh_Balken_V2.txt"
 displacements = solve_linear_elastic(input_filename)
 mises_stresses = output_mises_stress()
 

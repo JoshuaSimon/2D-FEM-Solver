@@ -14,7 +14,7 @@ init_solver <- function() {
     ptm <- proc.time()
 
     # Compile the C++ Source file with the main function. 
-    sourceCpp("D:/Dokumente/GitHub/2D-FEM-Solver/R Shiny Webapp/solver_main.cpp")
+    sourceCpp("R Shiny Webapp\\solver_main.cpp")
 
     # Stop the clock and print it to console. 
     print(proc.time() - ptm)
